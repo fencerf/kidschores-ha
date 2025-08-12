@@ -316,6 +316,9 @@ SERVICE_APPLY_BONUS = "apply_bonus"  # Apply bonus service
 SERVICE_RESET_PENALTIES = "reset_penalties"  # Reset penalties service
 SERVICE_RESET_BONUSES = "reset_bonuses"  # Reset bonuses service
 SERVICE_RESET_REWARDS = "reset_rewards"  # Reset rewards service
+SERVICE_ADD_CHORE = "add_chore"
+SERVICE_UPDATE_CHORE = "update_chore"
+SERVICE_DELETE_CHORE = "delete_chore"
 
 # Field Names (for consistency across services)
 FIELD_CHORE_ID = "chore_id"

@@ -240,6 +240,271 @@ reset_overdue_chores:
       required: false
       selector:
         text:
+
+add_chore:
+  name: "Add Chore"
+  description: "Adds a new chore to the integration."
+  fields:
+    chore_name:
+      name: "Chore Name"
+      description: "The name of the chore."
+      example: "Clean room"
+      required: true
+      selector:
+        text:
+    chore_description:
+      name: "Chore Description"
+      description: "A description of the chore."
+      example: "Clean your room every Saturday."
+      required: false
+      selector:
+        text:
+    default_points:
+      name: "Default Points"
+      description: "The number of points the chore is worth."
+      example: 5
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 1000
+          mode: box
+    assigned_kids:
+      name: "Assigned Kids"
+      description: "The kids assigned to this chore."
+      example: ["kid1", "kid2"]
+      required: true
+      selector:
+        object:
+    shared_chore:
+      name: "Shared Chore"
+      description: "Whether the chore is shared between the assigned kids."
+      example: false
+      required: false
+      selector:
+        boolean:
+    allow_multiple_claims_per_day:
+      name: "Allow Multiple Claims Per Day"
+      description: "Whether the chore can be claimed multiple times per day."
+      example: false
+      required: false
+      selector:
+        boolean:
+    partial_allowed:
+      name: "Partial Allowed"
+      description: "Whether partial points can be awarded for this chore."
+      example: false
+      required: false
+      selector:
+        boolean:
+    icon:
+      name: "Icon"
+      description: "The icon to use for the chore."
+      example: "mdi:broom"
+      required: false
+      selector:
+        icon:
+    recurring_frequency:
+      name: "Recurring Frequency"
+      description: "How often the chore recurs."
+      example: "weekly"
+      required: false
+      selector:
+        text:
+    custom_interval:
+      name: "Custom Interval"
+      description: "The custom interval for recurring chores."
+      example: 2
+      required: false
+      selector:
+        number:
+          min: 1
+          step: 1
+          mode: box
+    custom_interval_unit:
+      name: "Custom Interval Unit"
+      description: "The unit for the custom interval."
+      example: "weeks"
+      required: false
+      selector:
+        text:
+    applicable_days:
+      name: "Applicable Days"
+      description: "The days of the week the chore is applicable."
+      example: ["mon", "wed", "fri"]
+      required: false
+      selector:
+        object:
+    due_date:
+      name: "Due Date"
+      description: "The due date for the chore."
+      example: "2025-12-31T23:59:59"
+      required: false
+      selector:
+        datetime:
+    notify_on_claim:
+      name: "Notify on Claim"
+      description: "Whether to send a notification when the chore is claimed."
+      example: true
+      required: false
+      selector:
+        boolean:
+    notify_on_approval:
+      name: "Notify on Approval"
+      description: "Whether to send a notification when the chore is approved."
+      example: true
+      required: false
+      selector:
+        boolean:
+    notify_on_disapproval:
+      name: "Notify on Disapproval"
+      description: "Whether to send a notification when the chore is disapproved."
+      example: true
+      required: false
+      selector:
+        boolean:
+
+update_chore:
+  name: "Update Chore"
+  description: "Updates an existing chore."
+  fields:
+    chore_id:
+      name: "Chore ID"
+      description: "The ID of the chore to update."
+      example: "abcdef123456"
+      required: true
+      selector:
+        text:
+    chore_name:
+      name: "Chore Name"
+      description: "The name of the chore."
+      example: "Clean room"
+      required: false
+      selector:
+        text:
+    chore_description:
+      name: "Chore Description"
+      description: "A description of the chore."
+      example: "Clean your room every Saturday."
+      required: false
+      selector:
+        text:
+    default_points:
+      name: "Default Points"
+      description: "The number of points the chore is worth."
+      example: 5
+      required: false
+      selector:
+        number:
+          min: 0
+          max: 1000
+          mode: box
+    assigned_kids:
+      name: "Assigned Kids"
+      description: "The kids assigned to this chore."
+      example: ["kid1", "kid2"]
+      required: false
+      selector:
+        object:
+    shared_chore:
+      name: "Shared Chore"
+      description: "Whether the chore is shared between the assigned kids."
+      example: false
+      required: false
+      selector:
+        boolean:
+    allow_multiple_claims_per_day:
+      name: "Allow Multiple Claims Per Day"
+      description: "Whether the chore can be claimed multiple times per day."
+      example: false
+      required: false
+      selector:
+        boolean:
+    partial_allowed:
+      name: "Partial Allowed"
+      description: "Whether partial points can be awarded for this chore."
+      example: false
+      required: false
+      selector:
+        boolean:
+    icon:
+      name: "Icon"
+      description: "The icon to use for the chore."
+      example: "mdi:broom"
+      required: false
+      selector:
+        icon:
+    recurring_frequency:
+      name: "Recurring Frequency"
+      description: "How often the chore recurs."
+      example: "weekly"
+      required: false
+      selector:
+        text:
+    custom_interval:
+      name: "Custom Interval"
+      description: "The custom interval for recurring chores."
+      example: 2
+      required: false
+      selector:
+        number:
+          min: 1
+          step: 1
+          mode: box
+    custom_interval_unit:
+      name: "Custom Interval Unit"
+      description: "The unit for the custom interval."
+      example: "weeks"
+      required: false
+      selector:
+        text:
+    applicable_days:
+      name: "Applicable Days"
+      description: "The days of the week the chore is applicable."
+      example: ["mon", "wed", "fri"]
+      required: false
+      selector:
+        object:
+    due_date:
+      name: "Due Date"
+      description: "The due date for the chore."
+      example: "2025-12-31T23:59:59"
+      required: false
+      selector:
+        datetime:
+    notify_on_claim:
+      name: "Notify on Claim"
+      description: "Whether to send a notification when the chore is claimed."
+      example: true
+      required: false
+      selector:
+        boolean:
+    notify_on_approval:
+      name: "Notify on Approval"
+      description: "Whether to send a notification when the chore is approved."
+      example: true
+      required: false
+      selector:
+        boolean:
+    notify_on_disapproval:
+      name: "Notify on Disapproval"
+      description: "Whether to send a notification when the chore is disapproved."
+      example: true
+      required: false
+      selector:
+        boolean:
+
+delete_chore:
+  name: "Delete Chore"
+  description: "Deletes a chore."
+  fields:
+    chore_id:
+      name: "Chore ID"
+      description: "The ID of the chore to delete."
+      example: "abcdef123456"
+      required: true
+      selector:
+        text:
     chore_name:
       name: "Chore Name"
       description: "The name of the chore to reset (optional if chore_id is provided)."

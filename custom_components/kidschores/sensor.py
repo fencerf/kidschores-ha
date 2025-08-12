@@ -155,6 +155,12 @@ async def async_setup_entry(
     # Sensor to detail number of Rewards pending approval
     entities.append(PendingRewardApprovalsSensor(coordinator, entry))
 
+    # Sensor to expose all chores data
+    entities.append(KidsChoresChoresSensor(coordinator, entry))
+
+    # Sensor to expose all kids data
+    entities.append(KidsChoresKidsSensor(coordinator, entry))
+
     # For each kid, add standard sensors
     for kid_id, kid_info in coordinator.kids_data.items():
         kid_name = kid_info.get("name", f"Kid {kid_id}")
@@ -2144,6 +2150,56 @@ class ChoreStreakSensor(CoordinatorEntity, SensorEntity):
         """Return the chore's custom icon if set, else fallback."""
         chore_info = self.coordinator.chores_data.get(self._chore_id, {})
         return chore_info.get("icon", DEFAULT_CHORE_SENSOR_ICON)
+
+
+# ------------------------------------------------------------------------------------------
+class KidsChoresKidsSensor(CoordinatorEntity, SensorEntity):
+    """Sensor to expose all kids data."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "kids_sensor"
+
+    def __init__(self, coordinator, entry):
+        """Initialize the sensor."""
+
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_kids"
+        self.entity_id = f"sensor.kidschores_kids"
+
+    @property
+    def native_value(self):
+        """Return the number of kids."""
+        return len(self.coordinator.kids_data)
+
+    @property
+    def extra_state_attributes(self):
+        """Return the kids data."""
+        return {"kids": self.coordinator.kids_data}
+
+
+# ------------------------------------------------------------------------------------------
+class KidsChoresChoresSensor(CoordinatorEntity, SensorEntity):
+    """Sensor to expose all chores data."""
+
+    _attr_has_entity_name = True
+    _attr_translation_key = "chores_sensor"
+
+    def __init__(self, coordinator, entry):
+        """Initialize the sensor."""
+
+        super().__init__(coordinator)
+        self._attr_unique_id = f"{entry.entry_id}_chores"
+        self.entity_id = f"sensor.kidschores_chores"
+
+    @property
+    def native_value(self):
+        """Return the number of chores."""
+        return len(self.coordinator.chores_data)
+
+    @property
+    def extra_state_attributes(self):
+        """Return the chores data."""
+        return {"chores": self.coordinator.chores_data}
 
 
 # ------------------------------------------------------------------------------------------

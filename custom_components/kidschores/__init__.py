@@ -71,6 +71,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         ),
     )
 
+    hass.http.register_static_path(
+        f"/kidschores_assets",
+        hass.config.path(f"custom_components/{DOMAIN}/www"),
+        cache_headers=False,
+    )
+
+    hass.components.frontend.async_add_extra_js_url(
+        hass, f"/kidschores_assets/kidschores-card.js"
+    )
+
     LOGGER.info("KidsChores setup complete for entry: %s", entry.entry_id)
     return True
 
