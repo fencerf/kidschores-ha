@@ -73,7 +73,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     )
 
     await hass.http.async_register_static_paths([
-        StaticPathConfig(f"/kidschores_assets", hass.config.path(f"custom_components/{DOMAIN}/www", True))
+        StaticPathConfig(f"/kidschores_assets", hass.config.path(f"custom_components/{DOMAIN}/www"), True)
     ])
 
     hass.components.frontend.async_add_extra_js_url(
