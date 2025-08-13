@@ -316,6 +316,9 @@ SERVICE_APPLY_BONUS = "apply_bonus"  # Apply bonus service
 SERVICE_RESET_PENALTIES = "reset_penalties"  # Reset penalties service
 SERVICE_RESET_BONUSES = "reset_bonuses"  # Reset bonuses service
 SERVICE_RESET_REWARDS = "reset_rewards"  # Reset rewards service
+SERVICE_ADD_CHORE = "add_chore"
+SERVICE_UPDATE_CHORE = "update_chore"
+SERVICE_DELETE_CHORE = "delete_chore"
 
 # Field Names (for consistency across services)
 FIELD_CHORE_ID = "chore_id"
@@ -327,6 +330,16 @@ FIELD_PENALTY_NAME = "penalty_name"
 FIELD_POINTS_AWARDED = "points_awarded"
 FIELD_REWARD_NAME = "reward_name"
 FIELD_BONUS_NAME = "bonus_name"
+FIELD_CHORE_DESCRIPTION = "chore_description"
+FIELD_DEFAULT_POINTS = "default_points"
+FIELD_ASSIGNED_KIDS = "assigned_kids"
+FIELD_SHARED_CHORE = "shared_chore"
+FIELD_ALLOW_MULTIPLE_CLAIMS_PER_DAY = "allow_multiple_claims_per_day"
+FIELD_PARTIAL_ALLOWED = "partial_allowed"
+FIELD_ICON = "icon"
+FIELD_RECURRING_FREQUENCY = "recurring_frequency"
+FIELD_CUSTOM_INTERVAL = "custom_interval"
+FIELD_CUSTOM_INTERVAL_UNIT = "custom_interval_unit"
 
 # -------------------- Labels --------------------
 # Labels for Sensors and UI

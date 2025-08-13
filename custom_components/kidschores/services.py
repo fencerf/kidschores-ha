@@ -6,6 +6,7 @@ Includes UI editor support with selectors for dropdowns and text inputs.
 """
 
 import asyncio
+import uuid
 import voluptuous as vol
 
 from typing import Optional
@@ -32,13 +33,29 @@ from .const import (
     FIELD_POINTS_AWARDED,
     FIELD_REWARD_NAME,
     FIELD_BONUS_NAME,
+    FIELD_CHORE_DESCRIPTION,
+    FIELD_DEFAULT_POINTS,
+    FIELD_ASSIGNED_KIDS,
+    FIELD_SHARED_CHORE,
+    FIELD_ALLOW_MULTIPLE_CLAIMS_PER_DAY,
+    FIELD_PARTIAL_ALLOWED,
+    FIELD_ICON,
+    FIELD_RECURRING_FREQUENCY,
+    FIELD_CUSTOM_INTERVAL,
+    FIELD_CUSTOM_INTERVAL_UNIT,
+    CONF_APPLICABLE_DAYS,
+    CONF_NOTIFY_ON_CLAIM,
+    CONF_NOTIFY_ON_APPROVAL,
+    CONF_NOTIFY_ON_DISAPPROVAL,
     LOGGER,
     MSG_NO_ENTRY_FOUND,
+    SERVICE_ADD_CHORE,
     SERVICE_APPLY_PENALTY,
     SERVICE_APPLY_BONUS,
     SERVICE_APPROVE_CHORE,
     SERVICE_APPROVE_REWARD,
     SERVICE_CLAIM_CHORE,
+    SERVICE_DELETE_CHORE,
     SERVICE_DISAPPROVE_CHORE,
     SERVICE_DISAPPROVE_REWARD,
     SERVICE_REDEEM_REWARD,
@@ -50,6 +67,7 @@ from .const import (
     SERVICE_RESET_REWARDS,
     SERVICE_SET_CHORE_DUE_DATE,
     SERVICE_SKIP_CHORE_DUE_DATE,
+    SERVICE_UPDATE_CHORE,
 )
 from .coordinator import KidsChoresDataCoordinator
 from .kc_helpers import is_user_authorized_for_global_action, is_user_authorized_for_kid
@@ -165,6 +183,56 @@ SKIP_CHORE_DUE_DATE_SCHEMA = vol.Schema(
     {
         vol.Optional(FIELD_CHORE_ID): cv.string,
         vol.Optional(FIELD_CHORE_NAME): cv.string,
+    }
+)
+
+
+ADD_CHORE_SCHEMA = vol.Schema(
+    {
+        vol.Required(FIELD_CHORE_NAME): cv.string,
+        vol.Optional(FIELD_CHORE_DESCRIPTION): cv.string,
+        vol.Required(FIELD_DEFAULT_POINTS): vol.Coerce(float),
+        vol.Required(FIELD_ASSIGNED_KIDS): vol.All(cv.ensure_list, [cv.string]),
+        vol.Optional(FIELD_SHARED_CHORE, default=False): cv.boolean,
+        vol.Optional(FIELD_ALLOW_MULTIPLE_CLAIMS_PER_DAY, default=False): cv.boolean,
+        vol.Optional(FIELD_PARTIAL_ALLOWED, default=False): cv.boolean,
+        vol.Optional(FIELD_ICON): cv.string,
+        vol.Optional(FIELD_RECURRING_FREQUENCY, default="none"): cv.string,
+        vol.Optional(FIELD_CUSTOM_INTERVAL): vol.Coerce(int),
+        vol.Optional(FIELD_CUSTOM_INTERVAL_UNIT): cv.string,
+        vol.Optional(CONF_APPLICABLE_DAYS, default=[]): vol.All(cv.ensure_list, [cv.string]),
+        vol.Optional(FIELD_DUE_DATE): cv.string,
+        vol.Optional(CONF_NOTIFY_ON_CLAIM, default=True): cv.boolean,
+        vol.Optional(CONF_NOTIFY_ON_APPROVAL, default=True): cv.boolean,
+        vol.Optional(CONF_NOTIFY_ON_DISAPPROVAL, default=True): cv.boolean,
+    }
+)
+
+UPDATE_CHORE_SCHEMA = vol.Schema(
+    {
+        vol.Required(FIELD_CHORE_ID): cv.string,
+        vol.Optional(FIELD_CHORE_NAME): cv.string,
+        vol.Optional(FIELD_CHORE_DESCRIPTION): cv.string,
+        vol.Optional(FIELD_DEFAULT_POINTS): vol.Coerce(float),
+        vol.Optional(FIELD_ASSIGNED_KIDS): vol.All(cv.ensure_list, [cv.string]),
+        vol.Optional(FIELD_SHARED_CHORE): cv.boolean,
+        vol.Optional(FIELD_ALLOW_MULTIPLE_CLAIMS_PER_DAY): cv.boolean,
+        vol.Optional(FIELD_PARTIAL_ALLOWED): cv.boolean,
+        vol.Optional(FIELD_ICON): cv.string,
+        vol.Optional(FIELD_RECURRING_FREQUENCY): cv.string,
+        vol.Optional(FIELD_CUSTOM_INTERVAL): vol.Coerce(int),
+        vol.Optional(FIELD_CUSTOM_INTERVAL_UNIT): cv.string,
+        vol.Optional(CONF_APPLICABLE_DAYS): vol.All(cv.ensure_list, [cv.string]),
+        vol.Optional(FIELD_DUE_DATE): cv.string,
+        vol.Optional(CONF_NOTIFY_ON_CLAIM): cv.boolean,
+        vol.Optional(CONF_NOTIFY_ON_APPROVAL): cv.boolean,
+        vol.Optional(CONF_NOTIFY_ON_DISAPPROVAL): cv.boolean,
+    }
+)
+
+DELETE_CHORE_SCHEMA = vol.Schema(
+    {
+        vol.Required(FIELD_CHORE_ID): cv.string,
     }
 )
 
@@ -1055,6 +1123,111 @@ def async_setup_services(hass: HomeAssistant):
         DOMAIN, SERVICE_APPLY_BONUS, handle_apply_bonus, schema=APPLY_BONUS_SCHEMA
     )
 
+    async def handle_add_chore(call: ServiceCall):
+        """Handle adding a new chore."""
+        entry_id = _get_first_kidschores_entry(hass)
+        if not entry_id:
+            LOGGER.warning("Add Chore: %s", MSG_NO_ENTRY_FOUND)
+            return
+
+        coordinator: KidsChoresDataCoordinator = hass.data[DOMAIN][entry_id]["coordinator"]
+
+        chore_name = call.data[FIELD_CHORE_NAME]
+        chores_dict = coordinator.chores_data
+        if any(chore_data["name"] == chore_name for chore_data in chores_dict.values()):
+            raise HomeAssistantError(f"Chore with name '{chore_name}' already exists.")
+
+        internal_id = str(uuid.uuid4())
+        chore_data = {
+            "internal_id": internal_id,
+            "name": chore_name,
+            "description": call.data.get(FIELD_CHORE_DESCRIPTION, ""),
+            "default_points": call.data[FIELD_DEFAULT_POINTS],
+            "assigned_kids": call.data[FIELD_ASSIGNED_KIDS],
+            "shared_chore": call.data.get(FIELD_SHARED_CHORE, False),
+            "allow_multiple_claims_per_day": call.data.get(FIELD_ALLOW_MULTIPLE_CLAIMS_PER_DAY, False),
+            "partial_allowed": call.data.get(FIELD_PARTIAL_ALLOWED, False),
+            "icon": call.data.get(FIELD_ICON, ""),
+            "recurring_frequency": call.data.get(FIELD_RECURRING_FREQUENCY, "none"),
+            "custom_interval": call.data.get(FIELD_CUSTOM_INTERVAL),
+            "custom_interval_unit": call.data.get(FIELD_CUSTOM_INTERVAL_UNIT),
+            "applicable_days": call.data.get(CONF_APPLICABLE_DAYS, []),
+            "due_date": call.data.get(FIELD_DUE_DATE),
+            "notify_on_claim": call.data.get(CONF_NOTIFY_ON_CLAIM, True),
+            "notify_on_approval": call.data.get(CONF_NOTIFY_ON_APPROVAL, True),
+            "notify_on_disapproval": call.data.get(CONF_NOTIFY_ON_DISAPPROVAL, True),
+        }
+
+        chores_dict[internal_id] = chore_data
+        coordinator.storage_manager.set_data({**coordinator.storage_manager.data, "chores": chores_dict})
+        await coordinator.storage_manager.async_save()
+        await coordinator.async_request_refresh()
+        LOGGER.info("Added chore: %s", chore_name)
+
+    async def handle_update_chore(call: ServiceCall):
+        """Handle updating an existing chore."""
+        entry_id = _get_first_kidschores_entry(hass)
+        if not entry_id:
+            LOGGER.warning("Update Chore: %s", MSG_NO_ENTRY_FOUND)
+            return
+
+        coordinator: KidsChoresDataCoordinator = hass.data[DOMAIN][entry_id]["coordinator"]
+
+        chore_id = call.data[FIELD_CHORE_ID]
+        chores_dict = coordinator.chores_data
+        if chore_id not in chores_dict:
+            raise HomeAssistantError(f"Chore with id '{chore_id}' not found.")
+
+        chore_data = chores_dict[chore_id]
+
+        update_data = call.data.copy()
+        if FIELD_CHORE_NAME in update_data:
+            update_data['name'] = update_data.pop(FIELD_CHORE_NAME)
+        if FIELD_CHORE_DESCRIPTION in update_data:
+            update_data['description'] = update_data.pop(FIELD_CHORE_DESCRIPTION)
+
+        update_data.pop(FIELD_CHORE_ID, None)
+
+        chore_data.update(update_data)
+
+        chores_dict[chore_id] = chore_data
+        coordinator.storage_manager.set_data({**coordinator.storage_manager.data, "chores": chores_dict})
+        await coordinator.storage_manager.async_save()
+        await coordinator.async_request_refresh()
+        LOGGER.info("Updated chore: %s", chore_data['name'])
+
+    async def handle_delete_chore(call: ServiceCall):
+        """Handle deleting a chore."""
+        entry_id = _get_first_kidschores_entry(hass)
+        if not entry_id:
+            LOGGER.warning("Delete Chore: %s", MSG_NO_ENTRY_FOUND)
+            return
+
+        coordinator: KidsChoresDataCoordinator = hass.data[DOMAIN][entry_id]["coordinator"]
+
+        chore_id = call.data["chore_id"]
+        chores_dict = coordinator.chores_data
+        if chore_id not in chores_dict:
+            raise HomeAssistantError(f"Chore with id '{chore_id}' not found.")
+
+        chore_name = chores_dict[chore_id]['name']
+        del chores_dict[chore_id]
+
+        coordinator.storage_manager.set_data({**coordinator.storage_manager.data, "chores": chores_dict})
+        await coordinator.storage_manager.async_save()
+        await coordinator.async_request_refresh()
+        LOGGER.info("Deleted chore: %s", chore_name)
+
+    hass.services.async_register(
+        DOMAIN, SERVICE_ADD_CHORE, handle_add_chore, schema=ADD_CHORE_SCHEMA
+    )
+    hass.services.async_register(
+        DOMAIN, SERVICE_UPDATE_CHORE, handle_update_chore, schema=UPDATE_CHORE_SCHEMA
+    )
+    hass.services.async_register(
+        DOMAIN, SERVICE_DELETE_CHORE, handle_delete_chore, schema=DELETE_CHORE_SCHEMA
+    )
+
     LOGGER.info("KidsChores services have been registered successfully")
 
 
@@ -1077,6 +1250,9 @@ async def async_unload_services(hass: HomeAssistant):
         SERVICE_RESET_REWARDS,
         SERVICE_SET_CHORE_DUE_DATE,
         SERVICE_SKIP_CHORE_DUE_DATE,
+        SERVICE_ADD_CHORE,
+        SERVICE_UPDATE_CHORE,
+        SERVICE_DELETE_CHORE,
     ]
 
     for service in services:
