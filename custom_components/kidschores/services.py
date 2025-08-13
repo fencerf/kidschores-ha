@@ -33,6 +33,20 @@ from .const import (
     FIELD_POINTS_AWARDED,
     FIELD_REWARD_NAME,
     FIELD_BONUS_NAME,
+    FIELD_CHORE_DESCRIPTION,
+    FIELD_DEFAULT_POINTS,
+    FIELD_ASSIGNED_KIDS,
+    FIELD_SHARED_CHORE,
+    FIELD_ALLOW_MULTIPLE_CLAIMS_PER_DAY,
+    FIELD_PARTIAL_ALLOWED,
+    FIELD_ICON,
+    FIELD_RECURRING_FREQUENCY,
+    FIELD_CUSTOM_INTERVAL,
+    FIELD_CUSTOM_INTERVAL_UNIT,
+    CONF_APPLICABLE_DAYS,
+    CONF_NOTIFY_ON_CLAIM,
+    CONF_NOTIFY_ON_APPROVAL,
+    CONF_NOTIFY_ON_DISAPPROVAL,
     LOGGER,
     MSG_NO_ENTRY_FOUND,
     SERVICE_ADD_CHORE,
@@ -175,50 +189,50 @@ SKIP_CHORE_DUE_DATE_SCHEMA = vol.Schema(
 
 ADD_CHORE_SCHEMA = vol.Schema(
     {
-        vol.Required("chore_name"): cv.string,
-        vol.Optional("chore_description"): cv.string,
-        vol.Required("default_points"): vol.Coerce(float),
-        vol.Required("assigned_kids"): vol.All(cv.ensure_list, [cv.string]),
-        vol.Optional("shared_chore", default=False): cv.boolean,
-        vol.Optional("allow_multiple_claims_per_day", default=False): cv.boolean,
-        vol.Optional("partial_allowed", default=False): cv.boolean,
-        vol.Optional("icon"): cv.string,
-        vol.Optional("recurring_frequency", default="none"): cv.string,
-        vol.Optional("custom_interval"): vol.Coerce(int),
-        vol.Optional("custom_interval_unit"): cv.string,
-        vol.Optional("applicable_days", default=[]): vol.All(cv.ensure_list, [cv.string]),
-        vol.Optional("due_date"): cv.string,
-        vol.Optional("notify_on_claim", default=True): cv.boolean,
-        vol.Optional("notify_on_approval", default=True): cv.boolean,
-        vol.Optional("notify_on_disapproval", default=True): cv.boolean,
+        vol.Required(FIELD_CHORE_NAME): cv.string,
+        vol.Optional(FIELD_CHORE_DESCRIPTION): cv.string,
+        vol.Required(FIELD_DEFAULT_POINTS): vol.Coerce(float),
+        vol.Required(FIELD_ASSIGNED_KIDS): vol.All(cv.ensure_list, [cv.string]),
+        vol.Optional(FIELD_SHARED_CHORE, default=False): cv.boolean,
+        vol.Optional(FIELD_ALLOW_MULTIPLE_CLAIMS_PER_DAY, default=False): cv.boolean,
+        vol.Optional(FIELD_PARTIAL_ALLOWED, default=False): cv.boolean,
+        vol.Optional(FIELD_ICON): cv.string,
+        vol.Optional(FIELD_RECURRING_FREQUENCY, default="none"): cv.string,
+        vol.Optional(FIELD_CUSTOM_INTERVAL): vol.Coerce(int),
+        vol.Optional(FIELD_CUSTOM_INTERVAL_UNIT): cv.string,
+        vol.Optional(CONF_APPLICABLE_DAYS, default=[]): vol.All(cv.ensure_list, [cv.string]),
+        vol.Optional(FIELD_DUE_DATE): cv.string,
+        vol.Optional(CONF_NOTIFY_ON_CLAIM, default=True): cv.boolean,
+        vol.Optional(CONF_NOTIFY_ON_APPROVAL, default=True): cv.boolean,
+        vol.Optional(CONF_NOTIFY_ON_DISAPPROVAL, default=True): cv.boolean,
     }
 )
 
 UPDATE_CHORE_SCHEMA = vol.Schema(
     {
-        vol.Required("chore_id"): cv.string,
-        vol.Optional("chore_name"): cv.string,
-        vol.Optional("chore_description"): cv.string,
-        vol.Optional("default_points"): vol.Coerce(float),
-        vol.Optional("assigned_kids"): vol.All(cv.ensure_list, [cv.string]),
-        vol.Optional("shared_chore"): cv.boolean,
-        vol.Optional("allow_multiple_claims_per_day"): cv.boolean,
-        vol.Optional("partial_allowed"): cv.boolean,
-        vol.Optional("icon"): cv.string,
-        vol.Optional("recurring_frequency"): cv.string,
-        vol.Optional("custom_interval"): vol.Coerce(int),
-        vol.Optional("custom_interval_unit"): cv.string,
-        vol.Optional("applicable_days"): vol.All(cv.ensure_list, [cv.string]),
-        vol.Optional("due_date"): cv.string,
-        vol.Optional("notify_on_claim"): cv.boolean,
-        vol.Optional("notify_on_approval"): cv.boolean,
-        vol.Optional("notify_on_disapproval"): cv.boolean,
+        vol.Required(FIELD_CHORE_ID): cv.string,
+        vol.Optional(FIELD_CHORE_NAME): cv.string,
+        vol.Optional(FIELD_CHORE_DESCRIPTION): cv.string,
+        vol.Optional(FIELD_DEFAULT_POINTS): vol.Coerce(float),
+        vol.Optional(FIELD_ASSIGNED_KIDS): vol.All(cv.ensure_list, [cv.string]),
+        vol.Optional(FIELD_SHARED_CHORE): cv.boolean,
+        vol.Optional(FIELD_ALLOW_MULTIPLE_CLAIMS_PER_DAY): cv.boolean,
+        vol.Optional(FIELD_PARTIAL_ALLOWED): cv.boolean,
+        vol.Optional(FIELD_ICON): cv.string,
+        vol.Optional(FIELD_RECURRING_FREQUENCY): cv.string,
+        vol.Optional(FIELD_CUSTOM_INTERVAL): vol.Coerce(int),
+        vol.Optional(FIELD_CUSTOM_INTERVAL_UNIT): cv.string,
+        vol.Optional(CONF_APPLICABLE_DAYS): vol.All(cv.ensure_list, [cv.string]),
+        vol.Optional(FIELD_DUE_DATE): cv.string,
+        vol.Optional(CONF_NOTIFY_ON_CLAIM): cv.boolean,
+        vol.Optional(CONF_NOTIFY_ON_APPROVAL): cv.boolean,
+        vol.Optional(CONF_NOTIFY_ON_DISAPPROVAL): cv.boolean,
     }
 )
 
 DELETE_CHORE_SCHEMA = vol.Schema(
     {
-        vol.Required("chore_id"): cv.string,
+        vol.Required(FIELD_CHORE_ID): cv.string,
     }
 )
 
@@ -1118,7 +1132,7 @@ def async_setup_services(hass: HomeAssistant):
 
         coordinator: KidsChoresDataCoordinator = hass.data[DOMAIN][entry_id]["coordinator"]
 
-        chore_name = call.data["chore_name"]
+        chore_name = call.data[FIELD_CHORE_NAME]
         chores_dict = coordinator.chores_data
         if any(chore_data["name"] == chore_name for chore_data in chores_dict.values()):
             raise HomeAssistantError(f"Chore with name '{chore_name}' already exists.")
@@ -1127,21 +1141,21 @@ def async_setup_services(hass: HomeAssistant):
         chore_data = {
             "internal_id": internal_id,
             "name": chore_name,
-            "description": call.data.get("chore_description", ""),
-            "default_points": call.data["default_points"],
-            "assigned_kids": call.data["assigned_kids"],
-            "shared_chore": call.data.get("shared_chore", False),
-            "allow_multiple_claims_per_day": call.data.get("allow_multiple_claims_per_day", False),
-            "partial_allowed": call.data.get("partial_allowed", False),
-            "icon": call.data.get("icon", ""),
-            "recurring_frequency": call.data.get("recurring_frequency", "none"),
-            "custom_interval": call.data.get("custom_interval"),
-            "custom_interval_unit": call.data.get("custom_interval_unit"),
-            "applicable_days": call.data.get("applicable_days", []),
-            "due_date": call.data.get("due_date"),
-            "notify_on_claim": call.data.get("notify_on_claim", True),
-            "notify_on_approval": call.data.get("notify_on_approval", True),
-            "notify_on_disapproval": call.data.get("notify_on_disapproval", True),
+            "description": call.data.get(FIELD_CHORE_DESCRIPTION, ""),
+            "default_points": call.data[FIELD_DEFAULT_POINTS],
+            "assigned_kids": call.data[FIELD_ASSIGNED_KIDS],
+            "shared_chore": call.data.get(FIELD_SHARED_CHORE, False),
+            "allow_multiple_claims_per_day": call.data.get(FIELD_ALLOW_MULTIPLE_CLAIMS_PER_DAY, False),
+            "partial_allowed": call.data.get(FIELD_PARTIAL_ALLOWED, False),
+            "icon": call.data.get(FIELD_ICON, ""),
+            "recurring_frequency": call.data.get(FIELD_RECURRING_FREQUENCY, "none"),
+            "custom_interval": call.data.get(FIELD_CUSTOM_INTERVAL),
+            "custom_interval_unit": call.data.get(FIELD_CUSTOM_INTERVAL_UNIT),
+            "applicable_days": call.data.get(CONF_APPLICABLE_DAYS, []),
+            "due_date": call.data.get(FIELD_DUE_DATE),
+            "notify_on_claim": call.data.get(CONF_NOTIFY_ON_CLAIM, True),
+            "notify_on_approval": call.data.get(CONF_NOTIFY_ON_APPROVAL, True),
+            "notify_on_disapproval": call.data.get(CONF_NOTIFY_ON_DISAPPROVAL, True),
         }
 
         chores_dict[internal_id] = chore_data
@@ -1159,7 +1173,7 @@ def async_setup_services(hass: HomeAssistant):
 
         coordinator: KidsChoresDataCoordinator = hass.data[DOMAIN][entry_id]["coordinator"]
 
-        chore_id = call.data["chore_id"]
+        chore_id = call.data[FIELD_CHORE_ID]
         chores_dict = coordinator.chores_data
         if chore_id not in chores_dict:
             raise HomeAssistantError(f"Chore with id '{chore_id}' not found.")
@@ -1167,12 +1181,12 @@ def async_setup_services(hass: HomeAssistant):
         chore_data = chores_dict[chore_id]
 
         update_data = call.data.copy()
-        if 'chore_name' in update_data:
-            update_data['name'] = update_data.pop('chore_name')
-        if 'chore_description' in update_data:
-            update_data['description'] = update_data.pop('chore_description')
+        if FIELD_CHORE_NAME in update_data:
+            update_data['name'] = update_data.pop(FIELD_CHORE_NAME)
+        if FIELD_CHORE_DESCRIPTION in update_data:
+            update_data['description'] = update_data.pop(FIELD_CHORE_DESCRIPTION)
 
-        update_data.pop('chore_id', None)
+        update_data.pop(FIELD_CHORE_ID, None)
 
         chore_data.update(update_data)
 

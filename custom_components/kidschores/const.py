@@ -330,6 +330,16 @@ FIELD_PENALTY_NAME = "penalty_name"
 FIELD_POINTS_AWARDED = "points_awarded"
 FIELD_REWARD_NAME = "reward_name"
 FIELD_BONUS_NAME = "bonus_name"
+FIELD_CHORE_DESCRIPTION = "chore_description"
+FIELD_DEFAULT_POINTS = "default_points"
+FIELD_ASSIGNED_KIDS = "assigned_kids"
+FIELD_SHARED_CHORE = "shared_chore"
+FIELD_ALLOW_MULTIPLE_CLAIMS_PER_DAY = "allow_multiple_claims_per_day"
+FIELD_PARTIAL_ALLOWED = "partial_allowed"
+FIELD_ICON = "icon"
+FIELD_RECURRING_FREQUENCY = "recurring_frequency"
+FIELD_CUSTOM_INTERVAL = "custom_interval"
+FIELD_CUSTOM_INTERVAL_UNIT = "custom_interval_unit"
 
 # -------------------- Labels --------------------
 # Labels for Sensors and UI
