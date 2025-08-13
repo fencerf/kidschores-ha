@@ -71,7 +71,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         ),
     )
 
-    hass.http.async_register_static_path(
+    hass.http.async_register_static_paths(
         f"/kidschores_assets",
         hass.config.path(f"custom_components/{DOMAIN}/www"),
         cache_headers=False,
